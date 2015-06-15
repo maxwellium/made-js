@@ -9,7 +9,6 @@ Example
 -------
 
 ```
-#!javascript
 
     Made.request('rpc://crm/systemstats')
         .then(function(result){
@@ -45,14 +44,12 @@ The AngularJS made service, which provides access to the made cluster.
     + **args** An array of parameters.
     + **kwargs** A dictonary of keyword arguments.
 
-    ```
-    #!javascript
+    Example:
 
         Made.request('rpc://crm/file/list')
             .then(function(result) {
                 // ...
             });
-    ```
 
 + loginByName(name, password)
 
@@ -61,14 +58,12 @@ The AngularJS made service, which provides access to the made cluster.
     + **name** The user name.
     + **password** The user password.
 
-    ```
-    #!javascript
+    Example:
 
         Made.loginByName('hans', 'l34d')
             .then(function(result) {
 
             });
-    ```
 
 + loginByEmail(email, password)
 
@@ -77,14 +72,12 @@ The AngularJS made service, which provides access to the made cluster.
     + **email** The email of the user.
     + **password** The user password.
 
-    ```
-    #!javascript
+    Example:
 
         Made.loginByEmail('hans@funky.net', 'l34d')
             .then(function(result) {
 
             });
-    ```
 
 + logout()
 
@@ -112,13 +105,12 @@ File
 
 + readAll()
 
-    ```
-    #!javascript
+    Example:
 
-        file.readAll(function(data) {
+        file.readAll()
+            .then(function(data) {
 
         });
-    ```
 
 + append(data)
 + store()
