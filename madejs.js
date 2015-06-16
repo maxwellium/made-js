@@ -166,7 +166,7 @@ function File(made, fctx) {
         var $q = $injector.get('$q');
         var defer = $q.defer();
 
-        me.made.services.crm.file.read(me.ctx.filename)
+        me.made.request('rpc://crm/file/read', [me.ctx.filename])
             .then(function(result){
                     me.data = _base64ToArrayBuffer(result.data);
                     // me.data = window.atob(result.data);
@@ -182,7 +182,7 @@ function File(made, fctx) {
         var $q = $injector.get('$q');
         var defer = $q.defer();
 
-        me.made.services.crm.file.read(me.ctx.filename, pos, length)
+        me.made.request('rpc://crm/file/read', [me.ctx.filename, pos, length])
             .then(function(result){
                 defer.resolve(result.data);
             });
@@ -195,7 +195,7 @@ function File(made, fctx) {
         var $q = $injector.get('$q');
         var defer = $q.defer();
 
-        me.made.services.crm.file.append(me.ctx.filename, data)
+        me.made.request('rpc://crm/file/append', [me.ctx.filename, data])
             .then(function(result) {
                 me.ctx = result.data;
 
@@ -268,7 +268,7 @@ function File(made, fctx) {
     };
 
     me.remove = function() {
-        me.made.services.crm.file.remove(me.ctx.filename);
+        me.made.request('rpc://crm/file/remove', [me.ctx.filename]);
     };
 
     return me;
