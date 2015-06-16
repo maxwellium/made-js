@@ -24,7 +24,7 @@ The AngularJS made service, which provides access to the made cluster.
 
 ### Attributes
 
-+ **user**
++ user
 
     The logged in user or *null*.
 
@@ -50,6 +50,57 @@ The AngularJS made service, which provides access to the made cluster.
             .then(function(result) {
                 // ...
             });
+
++ channel(uri, args, kwargs)
+
+    Creates a channel to the requested resource in the made network.
+
+
+    + **uri** The resource url.
+    + **args** An array of parameters.
+    + **kwargs** A dictonary of keyword arguments.
+
+    Example:
+
+        var channel = Made.channel('file://crm/myfile');
+
++ topology()
+
+    Returns a JSON which describes the topology of the made service network.
+
+    Result:
+
+        {
+            "nodes": [{"id": "", "type": "", "host": "", "port": 9090}],
+            "links": [{"source": 0, "target": 1}]
+        }
+
++ capabilities()
+
+    Returns a JSON which describes the capabilites of the made service network.
+
+    Result:
+
+        [{
+            "id": "",
+            "doc": "",
+            "type": "",
+            "workflows": [],
+            "subspaces": [{
+                "name": "",
+                "brief": "",
+                "doc": "",
+                "type": "rpc",
+                "params": "",
+                "version": ""
+            }, {
+                "name": "",
+                "brief": "",
+                "doc": "",
+                "type": "namespace",
+                "subspaces": "",
+            }],
+        }]
 
 + loginByName(name, password)
 
@@ -112,6 +163,57 @@ File
 
         });
 
-+ append(data)
++ read(pos, length)
+
+    Reads a chunk of data
+
 + store()
+
+    Stores the file in the made cluster, with the *fctx.filename*.
+
+    Example:
+
+        file.store()
+            .then(function() {
+                // finished uploading.
+            });
+
 + save()
+
+    Opens the file save dialog in the browser, to save the file.
+
+
+Channel
+-------
+
+### Attributes
+
++ uri
+
+    The used resource uri.
+
++ context
+
+    The context of the channel.
+
+### Functions
+
++ send(data)
+
+    Broadcasts the data over the channel.
+
++ recv()
+
+    If there is data in the buffer it is returned, else null.
+
++ asyncRecv()
+
+    Returns an Angular-Js promis.
+
+    Example:
+
+        channel.asyncRecv()
+            .then(function(data) {
+
+            });
+
