@@ -5,6 +5,17 @@ made-js
 
 A thin made node for the made cluster.
 
+Install
+-------
+
+Add the following line to your *bower.json*:
+
+    "dependencies": {
+        ...
+        "made-js": "git@bitbucket.org:slicedice/made-js.git"
+        ...
+    }
+
 Example
 -------
 
