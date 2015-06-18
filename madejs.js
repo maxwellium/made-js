@@ -230,8 +230,15 @@ function File(made, fctx) {
                 setTimeout(function(){upload(idx + me.ctx.chunk_size);}, 300);
             }
             else {
-                channel.close();
-                defer.resolve();
+                channel.send('done-writing');
+
+                channel.asyncRecv()
+                    .then(function(data) {
+                        if(LOGGING) console.log('finished uploading');
+
+                        me.ctx = data;
+                        defer.resolve();
+                    });
             }
         }
 
