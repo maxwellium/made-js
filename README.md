@@ -16,7 +16,7 @@ Example
 -------
 
 ```
-    var module = angula.module('myModule', [made-js]);
+    var module = angula.module('myModule', ['made-js']);
 
     module.controller('TestCtrl', function ($scope, $sce, Made) {
 
