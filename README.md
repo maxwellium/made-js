@@ -16,11 +16,15 @@ Example
 -------
 
 ```
+    var module = angula.module('myModule', [made-js]);
 
-    Made.request('rpc://crm/systemstats')
-        .then(function(result){
-            // ...
-        });
+    module.controller('TestCtrl', function ($scope, $sce, Made) {
+
+        Made.request('rpc://crm/systemstats')
+            .then(function(result){
+                // ...
+            });
+    });
 
 ```
 

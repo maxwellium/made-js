@@ -1,4 +1,4 @@
-var madejs = angular.module('madejs', ['uuid4', 'ngCookies'], function($compileProvider) {
+var madejs = angular.module('made-js', ['uuid4', 'ngCookies'], function($compileProvider) {
     // configure new 'made-compile' directive by passing a directive
     // factory function. The factory function injects the '$compile'
     $compileProvider.directive('madeCompile', function($compile) {
@@ -282,25 +282,6 @@ function File(made, fctx) {
 }
 
 
-function FileFromData(made, name, data) {
-    // data = new Uint8Array(data);
-    // var words = CryptoJS.lib.WordArray.create(data);
-    // var md5 = CryptoJS.MD5(words);
-    var fctx = {
-        'filename': name,
-        'chunk_size': 255*1024,
-        'length': data.byteLength,
-        'md5': '', //md5.toString(CryptoJS.enc.Hex),
-        'encoding': 'utf-8',
-        'meta': {}
-    };
-    var file = File(made, fctx);
-    file.data = data;
-
-    return file;
-}
-
-
 function Channel(made, uri, context) {
     var $injector = angular.injector(['ng']);
     var ctx = {
@@ -370,13 +351,12 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     var contexts = {};
     var made = this;
     var wss = new WebSocket(url());
-    var user = $cookieStore.get('user')
 
-    this.user = null;
+    this.user = $cookieStore.get('user');
     this.contexts = contexts;
 
-    if(user) {
-        this.user = user;
+    if(this.user == undefined) {
+        this.user = null;
     }
 
     function message(action, data) {
@@ -533,10 +513,29 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         return defer.promise;
     }
 
+    this.fileFromData = function(name, data) {
+        // data = new Uint8Array(data);
+        // var words = CryptoJS.lib.WordArray.create(data);
+        // var md5 = CryptoJS.MD5(words);
+        var fctx = {
+            'filename': name,
+            'chunk_size': 255*1024,
+            'length': data.byteLength,
+            'md5': '', //md5.toString(CryptoJS.enc.Hex),
+            'encoding': 'utf-8',
+            'meta': {}
+        };
+
+        var file = File(made, fctx);
+        file.data = data;
+
+        return file;
+    }
+
     this.loginByName = function(username, password) {
         var defer = $q.defer();
 
-        made.request('rpc://crm/user/login',[], {'user': username, 'password': password})
+        made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
             .then(function(result) {
                 if(result['success']) {
                     made.user = result['data'];
@@ -568,14 +567,13 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
             made.request('rpc://crm/user/logout');
             made.user = null;
 
-            $cookieStore.remove('user');
+            $cookieStore.put('user', null);
         }
     };
 
     this.isLoggedin = function() {
         return made.user != null;
     };
-
 });
 
 
