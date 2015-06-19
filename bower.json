@@ -11,7 +11,7 @@
     "slice+dice"
   ],
   "license": "MIT",
-  "homepage": "https://bitbucket.org/slicedice/made-js",
+  "homepage": "https://github.com/slicedice/made-js",
   "ignore": [
     "**/.*",
     "node_modules",

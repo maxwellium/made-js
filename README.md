@@ -10,11 +10,7 @@ Install
 
 Add the following line to your *bower.json*:
 
-    "dependencies": {
-        ...
-        "made-js": "git@bitbucket.org:slicedice/made-js.git"
-        ...
-    }
+    bower install made-js
 
 Example
 -------
