@@ -596,7 +596,7 @@ madejs.directive('madeStoreFile', function($parse, Made) {
                     reader.onload = function(onLoadEvent) {
                         // console.log('scope.' + attrs.madeStoreFile + ' = btoa(onLoadEvent.target.result);');
                         // eval('scope.' + attrs.madeStoreFile + ' = btoa(onLoadEvent.target.result);');
-                        cmd = 'scope.' + attrs.madeStoreFile + '.push(FileFromData(Made, current.name, onLoadEvent.target.result));';
+                        cmd = 'scope.' + attrs.madeStoreFile + '.push(Made.fileFromData(current.name, onLoadEvent.target.result));';
                         if(LOGGING) console.log(cmd);
                         eval(cmd);
                     };
