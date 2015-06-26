@@ -464,11 +464,11 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     };
 
     this.request = function(uri, args, kwargs) {
-        if(args == undefined) {
+        if(typeof args === "undefined") {
             args = [];
         }
 
-        if(kwargs == undefined) {
+        if(typeof kwargs === "undefined") {
             kwargs = {};
         }
 
