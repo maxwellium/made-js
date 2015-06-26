@@ -1,3 +1,6 @@
+/**
+ * @author Arne Simon [arne.simon@slice-dice.de]
+ */
 var madejs = angular.module('made-js', ['uuid4', 'ngCookies'], function($compileProvider) {
     // configure new 'made-compile' directive by passing a directive
     // factory function. The factory function injects the '$compile'
