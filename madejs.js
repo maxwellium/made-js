@@ -389,7 +389,11 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         switch (msg['action']) {
             case 'answer':
                 if(msg.context in contexts) {
-                    contexts[msg.context].resolve(msg);
+                    if (msg.success) {
+                        contexts[msg.context].resolve(msg);
+                    } else {
+                        contexts[msg.context].reject(msg);
+                    }
                     delete contexts[msg.context];
                 }
                 else {
@@ -536,33 +540,26 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     }
 
     this.loginByName = function(username, password) {
-        var defer = $q.defer();
 
-        made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
+        return made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
             .then(function(result) {
-                if(result['success']) {
-                    made.user = result['data'];
-                    $cookieStore.put('user', made.user);
-                }
+                made.user = result.data;
+                $cookieStore.put('user', made.user);
 
-                defer.resolve(result);
+                return result;
             });
 
-        return defer.promise;
     };
 
     this.loginByEmail = function(email, password) {
-        var defer = $q.defer();
 
-        made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
+        return made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
             .then(function(result) {
-                made.user = result['data'];
+                made.user = result.data;
                 $cookieStore.put('user', made.user);
 
-                defer.resolve(result);
+                return result;
             });
-
-        return defer.promise;
     };
 
     this.logout = function() {
