@@ -37,7 +37,7 @@ function url() {
     var prot = 'ws://';
 
     if(window.location.protocol === 'https:') {
-        prot = 'wss://'
+        prot = 'wss://';
     }
 
     return prot + window.location.host + '/ws';
@@ -47,7 +47,7 @@ function url() {
 function buildhtml(obj, path) {
     var data = '<div class="row responsiv-md list">';
 
-    for (name in obj) {
+    for (var name in obj) {
         var val = obj[name];
         data += '<div class="col">';
 
@@ -87,9 +87,9 @@ function Workflow(made, modtype, flow) {
             me.step = function() {
                 rpcs.workflow_step(me.ctx)
                     .then(function(result) {
-                        if(LOGGING) console.log('made-workflow-ctx:', result['data']);
+                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
 
-                        me.ctx = result['data'];
+                        me.ctx = result.data;
 
                         if(me.onupdate) {
                             me.onupdate(result);
@@ -100,9 +100,9 @@ function Workflow(made, modtype, flow) {
             me.start = function() {
                 rpcs.workflow_start(flow.name)
                     .then(function(result) {
-                        if(LOGGING) console.log('made-workflow-ctx:', result['data']);
+                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
 
-                        me.ctx = result['data'];
+                        me.ctx = result.data;
 
                         if(me.onupdate) {
                             me.onupdate(result);
@@ -116,7 +116,7 @@ function Workflow(made, modtype, flow) {
                         return me.ctx.template;
                     }
                     else {
-                        return buildhtml(me.ctx['data'], prefix + '.ctx.data.');
+                        return buildhtml(me.ctx.data, prefix + '.ctx.data.');
                     }
                 }
 
@@ -191,7 +191,7 @@ function File(made, fctx) {
             });
 
         return defer.promise;
-    }
+    };
 
     me.append = function(data) {
         var $injector = angular.injector(['ng']);
@@ -255,7 +255,7 @@ function File(made, fctx) {
 
         function do_save() {
             var pom = document.createElement('a');
-            var url = window.URL.createObjectURL(new Blob([me.data], {type: "octet/stream"}));
+            var url = window.URL.createObjectURL(new Blob([me.data], {type: 'octet/stream'}));
             pom.setAttribute('href', url);
             pom.setAttribute('download', me.ctx.filename);
 
@@ -302,7 +302,7 @@ function Channel(made, uri, context) {
             );
         },
         recv: function() {
-            return buffer.shift();
+            return ctx.buffer.shift();
         },
         handleRecv: function(data) {
             ctx.buffer.push(data);
@@ -317,7 +317,7 @@ function Channel(made, uri, context) {
             return ctx.listener.promise;
         },
         resolve: function(msg) {
-            if(LOGGING) console.log('channel-error', msg['error']);
+            if(LOGGING) console.log('channel-error', msg.error);
             ctx.handleClose();
         },
         handleClose: function() {
@@ -358,7 +358,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     this.user = $cookieStore.get('user');
     this.contexts = contexts;
 
-    if(this.user == undefined) {
+    if(undefined === this.user) {
         this.user = null;
     }
 
@@ -374,25 +374,35 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     }
 
     wss.onopen = function() {
-        if(LOGGING) console.log("socket has made opened!");
+        if(LOGGING) console.log('socket has made opened!');
     };
 
     wss.onerror = function (error) {
         console.log('madejs error: ', error);
     };
 
+    // TODO: implement exponential backoff and auto reopen socket
+    // wss.onclose = function(){
+    //     setTimeout(setupWebSocket, 1000);
+    // };
+
     wss.onmessage = function(msg) {
         msg = JSON.parse(msg.data);
 
         if(LOGGING) console.log('-- received --', msg);
 
-        switch (msg['action']) {
+        switch (msg.action) {
             case 'answer':
                 if(msg.context in contexts) {
                     if (msg.success) {
                         contexts[msg.context].resolve(msg);
                     } else {
-                        contexts[msg.context].reject(msg);
+                        if (contexts[msg.context].reject) {
+                            contexts[msg.context].reject(msg);
+                        }
+                        if (-1 !== msg.error.indexOf('unknown issuer token/key for user')) {
+                            made.logout();
+                        }
                     }
                     delete contexts[msg.context];
                 }
@@ -410,7 +420,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
             case 'channel':
                 switch(msg.data.type) {
                     case 'open':
-                        console.log('!!!FATAL!!! Opening channel to browser not allowed!')
+                        console.log('!!!FATAL!!! Opening channel to browser not allowed!');
                         break;
                     case 'package':
                         if(msg.context in contexts) contexts[msg.context].handleRecv(msg.data.package);
@@ -459,7 +469,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
 
     this.send_with_context = function(action, data, context) {
         var msg = message(action, data);
-        msg['context'] = context;
+        msg.context = context;
 
         if(LOGGING) console.log('-- sending --', msg);
 
@@ -471,22 +481,22 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     };
 
     this.request = function(uri, args, kwargs) {
-        if(typeof args === "undefined") {
+        if(typeof args === 'undefined') {
             args = [];
         }
 
-        if(typeof kwargs === "undefined") {
+        if(typeof kwargs === 'undefined') {
             kwargs = {};
         }
 
         var data = {
-            'uri': uri,
-            'args': args,
-            'kwargs': kwargs
+            uri    : uri,
+            args   : args,
+            kwargs : kwargs
         };
 
         return made.send('request', data);
-    }
+    };
 
     this.channel = function(uri) {
         var channel = Channel(made, uri, uuid4.generate());
@@ -499,7 +509,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
 
         made.send('topology', {})
         .then(function(result) {
-            var data = result['data'];
+            var data = result.data;
 
             defer.resolve(data);
         });
@@ -512,32 +522,32 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
 
         made.send('capabilities')
         .then(function(result) {
-            var data = result['data'];
+            var data = result.data;
 
             defer.resolve(data);
         });
 
         return defer.promise;
-    }
+    };
 
     this.fileFromData = function(name, data) {
         // data = new Uint8Array(data);
         // var words = CryptoJS.lib.WordArray.create(data);
         // var md5 = CryptoJS.MD5(words);
         var fctx = {
-            'filename': name,
-            'chunk_size': 255*1024,
-            'length': data.byteLength,
-            'md5': '', //md5.toString(CryptoJS.enc.Hex),
-            'encoding': 'utf-8',
-            'meta': {}
+            filename   : name,
+            chunk_size : 255*1024,
+            length     : data.byteLength,
+            md5        : '', //md5.toString(CryptoJS.enc.Hex),
+            encoding   : 'utf-8',
+            meta       : {}
         };
 
         var file = File(made, fctx);
         file.data = data;
 
         return file;
-    }
+    };
 
     this.loginByName = function(username, password) {
 
@@ -572,37 +582,56 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     };
 
     this.isLoggedin = function() {
-        return made.user != null;
+        return null !== made.user;
     };
 });
 
 
-madejs.directive('madeStoreFile', function($parse, Made) {
+madejs.directive('madeStoreFile', function($q, Made) {
     return {
         restrict: 'A',
-        scope: false,
-        link: function(scope, element, attrs) {
+        scope: {
+            madeStoreFile : '=',
+            itemId        : '=mfsItemId',
+            callback      : '&mfsCallback'
+        },
+        link: function(scope, element) {
 
             element.on('change', function(onChangeEvent) {
-                var element = (onChangeEvent.srcElement || onChangeEvent.target);
-                var cmd = 'scope.' + attrs.madeStoreFile + ' = [];';
-                if(LOGGING) console.log(cmd);
-                eval(cmd);
 
-                for (var i = element.files.length - 1; i >= 0; i--) {
-                    var current = element.files[i];
-                    var reader = new FileReader();
+                var
+                    filePromises = [],
+                    element      = (onChangeEvent.srcElement || onChangeEvent.target);
+
+                if ( 'object' !== typeof scope.madeStoreFile[scope.itemId] ) {
+                    scope.madeStoreFile[scope.itemId] = [];
+                }
+
+                Array.prototype.slice.call(element.files).forEach(function(file){
+                    var
+                        deferred = $q.defer(),
+                        reader   = new FileReader();
 
                     reader.onload = function(onLoadEvent) {
-                        // console.log('scope.' + attrs.madeStoreFile + ' = btoa(onLoadEvent.target.result);');
-                        // eval('scope.' + attrs.madeStoreFile + ' = btoa(onLoadEvent.target.result);');
-                        cmd = 'scope.' + attrs.madeStoreFile + '.push(Made.fileFromData(current.name, onLoadEvent.target.result));';
-                        if(LOGGING) console.log(cmd);
-                        eval(cmd);
+                        scope.madeStoreFile[scope.itemId].push( Made.fileFromData(file.name, onLoadEvent.target.result) );
+                        scope.$apply();
+                        deferred.resolve();
+                    };
+                    reader.onabort = reader.onerror = function(error){
+                        console.log('madeStoreFileDirective, FileReader aborted:', error);
+                        deferred.reject(error);
                     };
 
-                    reader.readAsArrayBuffer(current);
-                };
+                    filePromises.push(deferred.promise);
+
+                    reader.readAsArrayBuffer(file);
+                });
+
+                $q
+                    .all(filePromises)
+                    .then(function(){
+                        scope.callback();
+                    });
 
             });
         }
@@ -629,7 +658,7 @@ madejs.directive('madeTopology', function() {
         scope: {
           data: '='
         },
-        link: function (scope, element, attrs) {
+        link: function (scope, element) {
             var svg = d3.select(element[0])
                 .append('svg')
                 .attr('width', width)
@@ -637,7 +666,7 @@ madejs.directive('madeTopology', function() {
             var nodes = null;
             var links = null;
 
-            scope.$watch('data', function (newVal, oldVal) {
+            scope.$watch('data', function (newVal) {
                 if(LOGGING) console.log('made-topology nodes', newVal);
                 svg.selectAll('*').remove();
 
@@ -645,41 +674,41 @@ madejs.directive('madeTopology', function() {
                     return;
                 }
 
-                nodes = newVal['nodes'];
-                links = newVal['links'];
+                nodes = newVal.nodes;
+                links = newVal.links;
 
                 force.nodes(nodes);
                 force.links(links);
                 force.start();
 
-                var link = svg.selectAll(".topology-link")
+                var link = svg.selectAll('.topology-link')
                   .data(links)
-                .enter().append("line")
-                  .attr("class", "topology-link");
+                .enter().append('line')
+                  .attr('class', 'topology-link');
 
                 var node = svg
                     .selectAll('.topology-node')
                     .data(nodes)
                     .enter().append('circle')
-                    .attr("class", "topology-node")
-                    .attr("r", 15)
-                    .style("fill", function(d) { return color(d.type); })
+                    .attr('class', 'topology-node')
+                    .attr('r', 15)
+                    .style('fill', function(d) { return color(d.type); })
                     .call(force.drag);
 
-                force.on("tick", function() {
-                    link.attr("x1", function(d) { return d.source.x; })
-                        .attr("y1", function(d) { return d.source.y; })
-                        .attr("x2", function(d) { return d.target.x; })
-                        .attr("y2", function(d) { return d.target.y; });
+                force.on('tick', function() {
+                    link.attr('x1', function(d) { return d.source.x; })
+                        .attr('y1', function(d) { return d.source.y; })
+                        .attr('x2', function(d) { return d.target.x; })
+                        .attr('y2', function(d) { return d.target.y; });
 
-                    node.attr("cx", function(d) { return d.x; })
-                        .attr("cy", function(d) { return d.y; });
+                    node.attr('cx', function(d) { return d.x; })
+                        .attr('cy', function(d) { return d.y; });
                 });
 
             });
 
         }
-    }
+    };
 });
 
 
@@ -691,10 +720,10 @@ madejs.directive('madeTopologyLegend', function() {
         scope: {
           data: '='
         },
-        link: function (scope, element, attrs) {
+        link: function (scope, element) {
             var list = d3.select(element[0]).append('div');
 
-            scope.$watch('data', function (newVal, oldVal) {
+            scope.$watch('data', function (newVal) {
                 if(LOGGING) console.log('made-topology-legend nodes', newVal);
                 list.selectAll('*').remove();
 
@@ -702,9 +731,9 @@ madejs.directive('madeTopologyLegend', function() {
                     return;
                 }
 
-                var node = list
+                list
                     .selectAll('div')
-                    .data(newVal['nodes'])
+                    .data(newVal.nodes)
                     .enter().append('div')
                     .text(function(d){ return d.type; })
                     .append('div')
@@ -712,5 +741,5 @@ madejs.directive('madeTopologyLegend', function() {
                     .style('background-color', function(d){ return color(d.type); });
             });
         }
-    }
+    };
 });
