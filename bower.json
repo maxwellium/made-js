@@ -1,11 +1,11 @@
 {
   "name": "made-js",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "authors": [
     "Arne Simon [arne.simon@slice-dice.de]"
   ],
   "description": "made web module",
-  "main": "madejs.js",
+  "main": "dist/made.js",
   "keywords": [
     "made",
     "slice+dice"
