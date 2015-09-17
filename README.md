@@ -2,6 +2,7 @@ made-js
 =======
 
 **Author:** Arne Simon [arne.simon@slice-dice.de]
+**Author:** Max Fielker [max.fielker@slice-dice.de]
 
 A thin made node for the made cluster.
 
@@ -15,7 +16,7 @@ Add the following line to your *bower.json*:
 Example
 -------
 
-```
+```javascript
     var module = angula.module('myModule', ['made-js']);
 
     module.controller('TestCtrl', function ($scope, $sce, Made) {
