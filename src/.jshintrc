@@ -1,0 +1,9 @@
+{
+  "nonbsp": true,
+  "undef" : true,
+  "unused": true,
+  "quotmark": "single",
+  "trailing": true,
+  "browser": true,
+  "predef" : ["angular", "d3"]
+}
