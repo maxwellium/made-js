@@ -44,29 +44,6 @@ function url() {
 }
 
 
-function buildhtml(obj, path) {
-    var data = '<div class="row responsiv-md list">';
-
-    for (name in obj) {
-        var val = obj[name];
-        data += '<div class="col">';
-
-        if (typeof(val) != 'object') {
-            data += '<label class="item item-input">';
-            data += '    <span class="input-label">' + name + '</span>';
-            data += '    <input type="text" ng-model="' + path + name + '" />';
-            data += '</label>';
-        } else {
-            data += buildhtml(val, path + name + '.');
-        }
-        data += '</div>';
-    }
-
-    data += '</div>';
-    return data;
-}
-
-
 function Workflow(made, modtype, flow) {
     return {
         name: flow.name,
@@ -374,11 +351,11 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     }
 
     wss.onopen = function() {
-        if(LOGGING) console.log("socket has made opened!");
+        if(LOGGING) console.log("socket open!");
     };
 
     wss.onerror = function (error) {
-        console.log('madejs error: ', error);
+        console.log('socket error: ', error);
     };
 
     wss.onmessage = function(msg) {
@@ -389,11 +366,19 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         switch (msg['action']) {
             case 'answer':
                 if(msg.context in contexts) {
-                    contexts[msg.context].resolve(msg);
-                    delete contexts[msg.context];
+                     if (msg.success) {
+                        contexts[msg.context].resolve(msg);
+                    } else {
+                        if (contexts[msg.context].reject) {
+                            contexts[msg.context].reject(msg);
+                        }
+                        if (-1 !== msg.error.indexOf('unknown issuer token/key for user')) {
+                            made.logout();
+                        }
+                    }
                 }
                 else {
-                    if(LOGGING) console.log('madejs error: message for unknown context');
+                    if(LOGGING) console.log('made-js error: message for unknown context');
                 }
                 break;
             case 'request':
@@ -423,7 +408,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
 
     function when_connected(callback) {
         function wait() {
-            if(LOGGING) console.log('made - wait for connect');
+            if(LOGGING) console.log('made-js - wait for connect');
             setTimeout(function(){ when_connected(callback); }, 500);
         }
 
@@ -435,7 +420,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
                 callback();
             break;
             default:
-                if(LOGGING) console.log('madejs: BÄHM, tring to send over a closed socket!');
+                if(LOGGING) console.log('made-js: try to send over a closed socket!');
                 break;
         }
     }
@@ -522,7 +507,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         // var md5 = CryptoJS.MD5(words);
         var fctx = {
             'filename': name,
-            'chunk_size': 255*1024,
+            'chunk_size': 255 * 1024,
             'length': data.byteLength,
             'md5': '', //md5.toString(CryptoJS.enc.Hex),
             'encoding': 'utf-8',
@@ -538,31 +523,41 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     this.loginByName = function(username, password) {
         var defer = $q.defer();
 
-        made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
-            .then(function(result) {
-                if(result['success']) {
-                    made.user = result['data'];
-                    $cookieStore.put('user', made.user);
-                }
+        if(username && password) {
+            made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
+                .then(function(result) {
+                    if(result['success']) {
+                        made.user = result['data'];
+                        $cookieStore.put('user', made.user);
+                    }
 
-                defer.resolve(result);
-            });
+                    defer.resolve(result);
+                });
 
-        return defer.promise;
+            return defer.promise;
+        }
+        else {
+            throw 'username and password are requiered to not be empty';
+        }
     };
 
     this.loginByEmail = function(email, password) {
         var defer = $q.defer();
 
-        made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
-            .then(function(result) {
-                made.user = result['data'];
-                $cookieStore.put('user', made.user);
+        if(email && password) {
+            made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
+                .then(function(result) {
+                    made.user = result['data'];
+                    $cookieStore.put('user', made.user);
 
-                defer.resolve(result);
-            });
+                    defer.resolve(result);
+                });
 
-        return defer.promise;
+            return defer.promise;
+        }
+        else {
+            throw 'email and password are requiered to not be empty';
+        }
     };
 
     this.logout = function() {
@@ -580,7 +575,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
 });
 
 
-madejs.directive('madeStoreFile', function($parse, Made) {
+made-js.directive('madeStoreFile', function($parse, Made) {
     return {
         restrict: 'A',
         scope: false,
@@ -617,7 +612,7 @@ madejs.directive('madeStoreFile', function($parse, Made) {
  * http://briantford.com/blog/angular-d3
  * https://www.dashingd3js.com/d3-resources/d3-and-angular
  */
-madejs.directive('madeTopology', function() {
+made-js.directive('madeTopology', function() {
     var width = 640;
     var height = 480;
     var color = d3.scale.category20();
@@ -686,7 +681,7 @@ madejs.directive('madeTopology', function() {
 });
 
 
-madejs.directive('madeTopologyLegend', function() {
+made-js.directive('madeTopologyLegend', function() {
     var color = d3.scale.category20();
 
     return {
