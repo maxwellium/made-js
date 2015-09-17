@@ -58,10 +58,12 @@ The AngularJS made service, which provides access to the made cluster.
 
     Example:
 
+    ```javascript
         Made.request('rpc://crm/file/list')
             .then(function(result) {
                 // ...
             });
+    ```
 
 + channel(uri, args, kwargs)
 

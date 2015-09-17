@@ -650,7 +650,7 @@ madejs.directive('madeStoreFile', function($q, Made) {
  * http://briantford.com/blog/angular-d3
  * https://www.dashingd3js.com/d3-resources/d3-and-angular
  */
-made-js.directive('madeTopology', function() {
+madejs.directive('madeTopology', function() {
     var width = 640;
     var height = 480;
     var color = d3.scale.category20();
@@ -719,7 +719,7 @@ made-js.directive('madeTopology', function() {
 });
 
 
-made-js.directive('madeTopologyLegend', function() {
+madejs.directive('madeTopologyLegend', function() {
     var color = d3.scale.category20();
 
     return {
