@@ -331,11 +331,11 @@ function Channel(made, uri, context) {
 madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     var contexts = {};
     var made = this;
-    var wss = null;
     var reconnect_timeout = 1000;
 
     this.user = null;
     this.contexts = contexts;
+    this.wss = null;
 
 
     function setup_socket() {
@@ -346,6 +346,73 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         if(undefined === made.user) {
             made.user = null;
         }
+
+        made.wss.onopen = function() {
+            if(LOGGING) console.log("socket open!");
+        };
+
+        made.wss.onerror = function (error) {
+            console.log('socket error: ', error);
+        };
+
+        made.wss.onclose = function(){
+            setTimeout(setup_socket, made.reconnect_timeout);
+
+            if(made.reconnect_timeout < 1000*60*2) {
+                made.reconnect_timeout * 2;
+            }
+        };
+
+        made.wss.onmessage = function(msg) {
+            msg = JSON.parse(msg.data);
+
+            if(LOGGING) console.log('-- received --', msg);
+
+            switch (msg.action) {
+                case 'answer':
+                    if(msg.context in contexts) {
+                        if (msg.success) {
+                            contexts[msg.context].resolve(msg);
+                        } else {
+                            if (contexts[msg.context].reject) {
+                                contexts[msg.context].reject(msg);
+                            }
+
+                            // UnknownIssuer exception: because key from the login is not longer valid.
+                            if ('15c3ad4d828c5937a721893351c767fd' == msg.error.id) {
+                                made.logout();
+                            }
+                        }
+                        delete contexts[msg.context];
+                    }
+                    else {
+                        if(LOGGING) console.log('made-js error: message for unknown context');
+                    }
+                    break;
+                case 'request':
+                    var path = msg.data.path.join('.');
+                    var callback = subspaces[path];
+                    var result = callback(msg.data.args, msg.data.kwargs);
+
+                    answer(msg, result, null);
+                    break;
+                case 'channel':
+                    switch(msg.data.type) {
+                        case 'open':
+                            console.log('!!!FATAL!!! Opening channel to browser not allowed!');
+                            break;
+                        case 'package':
+                            if(msg.context in contexts) contexts[msg.context].handleRecv(msg.data.package);
+                            else if(LOGGING) console.log('package for unknown channel');
+                            break;
+                        case 'close':
+                            if(msg.context in contexts) contexts[msg.context].handleClose();
+                            else if(LOGGING) console.log('close for unknown channel');
+                            break;
+                    }
+            }
+
+        };
     }
 
     function message(action, data) {
@@ -359,92 +426,33 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         };
     }
 
-    wss.onopen = function() {
-        if(LOGGING) console.log("socket open!");
-    };
-
-    wss.onerror = function (error) {
-        console.log('socket error: ', error);
-    };
-
-    wss.onclose = function(){
-        setTimeout(setup_socket, made.reconnect_timeout);
-
-        if(made.reconnect_timeout < 1000*60*2) {
-            made.reconnect_timeout * 2;
-        }
-    };
-
-    wss.onmessage = function(msg) {
-        msg = JSON.parse(msg.data);
-
-        if(LOGGING) console.log('-- received --', msg);
-
-        switch (msg.action) {
-            case 'answer':
-                if(msg.context in contexts) {
-                    if (msg.success) {
-                        contexts[msg.context].resolve(msg);
-                    } else {
-                        if (contexts[msg.context].reject) {
-                            contexts[msg.context].reject(msg);
-                        }
-
-                        // UnknownIssuer exception: because key from the login is not longer valid.
-                        if ('fb9f68201d55519e5b5d36534073fc6f' == msg.error.id) {
-                            made.logout();
-                        }
-                    }
-                    delete contexts[msg.context];
-                }
-                else {
-                    if(LOGGING) console.log('made-js error: message for unknown context');
-                }
-                break;
-            case 'request':
-                var path = msg.data.path.join('.');
-                var callback = subspaces[path];
-                var result = callback(msg.data.args, msg.data.kwargs);
-
-                answer(msg, result, null);
-                break;
-            case 'channel':
-                switch(msg.data.type) {
-                    case 'open':
-                        console.log('!!!FATAL!!! Opening channel to browser not allowed!');
-                        break;
-                    case 'package':
-                        if(msg.context in contexts) contexts[msg.context].handleRecv(msg.data.package);
-                        else if(LOGGING) console.log('package for unknown channel');
-                        break;
-                    case 'close':
-                        if(msg.context in contexts) contexts[msg.context].handleClose();
-                        else if(LOGGING) console.log('close for unknown channel');
-                        break;
-                }
-        }
-
-    };
 
     function when_connected(callback) {
         function wait() {
             if(LOGGING) console.log('made-js - wait for connect');
-            setTimeout(function(){ when_connected(callback); }, 500);
+            setTimeout(function(){ when_connected(callback); }, 750);
         }
 
-        switch (wss.readyState) {
-            case WebSocket.CONNECTING:
-                wait();
-            break;
-            case WebSocket.OPEN:
-                made.reconnect_timeout = 1000;
-                callback();
-            break;
-            default:
-                if(LOGGING) console.log('made-js: try to send over a closed socket!');
+        if(made.wss) {
+            switch (made.wss.readyState) {
+                case WebSocket.CONNECTING:
+                    wait();
                 break;
+                case WebSocket.OPEN:
+                    made.reconnect_timeout = 1000;
+                    callback();
+                break;
+                default:
+                    if(LOGGING) console.log('made-js: try to send over a closed socket!');
+                    break;
+            }
+        }
+        else {
+            wait();
         }
     }
+
+    setup_socket();
 
     this.afterConnect = when_connected;
 
@@ -468,7 +476,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         var encoded = angular.toJson(msg);
 
         when_connected(function(){
-            wss.send(encoded);
+            made.wss.send(encoded);
         });
     };
 
@@ -544,6 +552,8 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     this.loginByName = function(username, password) {
 
         if(username && password) {
+            defer = $q.defer();
+
             made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
                 .then(function(result) {
                     if(result['success']) {
@@ -564,6 +574,8 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     this.loginByEmail = function(email, password) {
 
         if(email && password) {
+            defer = $q.defer();
+
             made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
                 .then(function(result) {
                     made.user = result['data'];
