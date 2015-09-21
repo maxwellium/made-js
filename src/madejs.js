@@ -471,7 +471,12 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         var msg = message(action, data);
         msg.context = context;
 
-        if(LOGGING) console.log('-- sending --', msg.data.uri, msg);
+        if(LOGGING) {
+            if(msg.action == 'request')
+                console.log('-- sending --', msg.data.uri, msg);
+            else
+                console.log('-- sending --', msg.action, msg);
+        }
 
         var encoded = angular.toJson(msg);
 
@@ -525,6 +530,17 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
                 var data = result.data;
 
                 defer.resolve(data);
+            });
+
+        return defer.promise;
+    };
+
+    this.schema = function(url) {
+        var defer = $q.defer();
+
+        made.send('schema', url)
+            .then(function(result) {
+                defer.resolve(result.data);
             });
 
         return defer.promise;

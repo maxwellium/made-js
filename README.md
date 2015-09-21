@@ -89,6 +89,23 @@ The AngularJS made service, which provides access to the made cluster.
             "links": [{"source": 0, "target": 1}]
         }
 
++ schema(url)
+
+    Returns a JSON which describes the resource addressed by the url.
+
+    Result:
+
+    ```json
+        {
+            "name": "",
+            "brief": "",
+            "doc": "",
+            "type": "rpc",
+            "params": "",
+            "version": ""
+        }
+    ```
+
 + capabilities()
 
     Returns a JSON which describes the capabilites of the made service network.
