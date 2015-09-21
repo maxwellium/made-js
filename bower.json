@@ -2,7 +2,8 @@
   "name": "made-js",
   "version": "0.1.7",
   "authors": [
-    "Arne Simon [arne.simon@slice-dice.de]"
+    "Arne Simon [arne.simon@slice-dice.de]",
+    "Max Fielker [max.fielker@slice-dice.de]"
   ],
   "description": "made web module",
   "main": "dist/made.js",

@@ -366,7 +366,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         made.wss.onmessage = function(msg) {
             msg = JSON.parse(msg.data);
 
-            if(LOGGING) console.log('-- received --', msg);
+            if(LOGGING) console.log('-- received --'+ (msg.error ? 'ERROR' : ''), msg);
 
             switch (msg.action) {
                 case 'answer':
@@ -471,7 +471,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
         var msg = message(action, data);
         msg.context = context;
 
-        if(LOGGING) console.log('-- sending --', msg);
+        if(LOGGING) console.log('-- sending --', msg.data.uri, msg);
 
         var encoded = angular.toJson(msg);
 
