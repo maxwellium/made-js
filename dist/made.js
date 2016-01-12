@@ -2,7 +2,9 @@
  * @author Arne Simon [arne.simon@slice-dice.de]
  * @author Max Fielker [max.fielker@slice.dice.de]
  */
-var madejs = angular.module('made-js', ['uuid4', 'ngCookies'], function($compileProvider) {
+var madejs = angular.module('made-js', ['uuid4', 'ngCookies']);
+
+madejs.config(['$compileProvider', function($compileProvider) {
     // configure new 'made-compile' directive by passing a directive
     // factory function. The factory function injects the '$compile'
     $compileProvider.directive('madeCompile', function($compile) {
@@ -27,7 +29,7 @@ var madejs = angular.module('made-js', ['uuid4', 'ngCookies'], function($compile
             );
         };
     });
-});
+}]);
 
 var LOGGING = true;
 
