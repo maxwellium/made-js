@@ -1,8 +1,8 @@
 made-js
 =======
 
-**Author:** Arne Simon [arne.simon@slice-dice.de]
-**Author:** Max Fielker [max.fielker@slice-dice.de]
+**Author:** Arne Simon [arne.simon@slice-dice.de]<br/>
+**Author:** Max Fielker [max.fielker@slice-dice.de]<br/>
 
 A thin made node for the made cluster.
 
