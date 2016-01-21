@@ -590,23 +590,13 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     };
 
     this.loginByEmail = function(email, password) {
+        return made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
+           .then(function(result) {
+               made.user = result.data;
+               $cookieStore.put('user', made.user);
 
-        if(email && password) {
-            defer = $q.defer();
-
-            made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
-                .then(function(result) {
-                    made.user = result['data'];
-                    $cookieStore.put('user', made.user);
-
-                    defer.resolve(result);
-                });
-
-            return defer.promise;
-        }
-        else {
-            throw 'email and password are requiered to not be empty';
-        }
+               return result;
+           });
     };
 
     this.logout = function() {

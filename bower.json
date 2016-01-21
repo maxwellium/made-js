@@ -3,7 +3,7 @@
   "version": "0.1.12",
   "authors": [
     "Arne Simon [arne.simon@slice-dice.de]",
-    "Max Fielker [max.fielker@slice-dice.de]"
+    "Max Fielker [mf@slice-dice.de]"
   ],
   "description": "made web module",
   "main": "dist/made.js",
