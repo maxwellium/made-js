@@ -21,8 +21,8 @@
     "tests"
   ],
   "dependencies": {
-    "angular-uuid4": "*",
-    "angular-cookies": "*",
-    "d3": "*"
+    "angular-uuid4": "latest",
+    "angular-cookies": "latest",
+    "d3": "latest"
   }
 }
