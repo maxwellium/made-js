@@ -330,7 +330,7 @@ function Channel(made, uri, context) {
 }
 
 
-madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
+madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     var contexts = {};
     var made = this;
     var reconnect_timeout = 1000;
@@ -338,6 +338,7 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
     this.user = null;
     this.contexts = contexts;
     this.wss = null;
+    this.errors = [];
 
 
     function setup_socket() {
@@ -376,9 +377,17 @@ madejs.service('Made', function($http, $q, $cookieStore, uuid4) {
                         if (msg.success) {
                             contexts[msg.context].resolve(msg);
                         } else {
+                            made.errors.push(msg);
+
+                            while(made.errors.length > 10) {
+                                made.errors.shift();
+                            }
+
                             if (contexts[msg.context].reject) {
                                 contexts[msg.context].reject(msg);
                             }
+
+                            $rootScope.$broadcast('made-error', msg);
 
                             // UnknownIssuer exception: because key from the login is not longer valid.
                             if ('15c3ad4d828c5937a721893351c767fd' == msg.error.id) {
