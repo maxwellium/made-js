@@ -513,7 +513,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         if(username && password) {
             defer = $q.defer();
 
-            made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
+            made.request('rpc://crm/user/login', {'user': username, 'password': password})
                 .then(function(result) {
                     if(result['success']) {
                         made.user = result['data'];
@@ -531,7 +531,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     };
 
     this.loginByEmail = function(email, password) {
-        return made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
+        return made.request('rpc://crm/user/login', {'email': email, 'password': password})
            .then(function(result) {
                made.user = result.data;
                $cookieStore.put('user', made.user);
