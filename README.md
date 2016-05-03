@@ -1,8 +1,10 @@
 made-js
 =======
 
-**Author:** Arne Simon [arne.simon@slice-dice.de]
-**Author:** Max Fielker [max.fielker@slice-dice.de]
+**Authors:**
+
++ Arne Simon [arne.simon@slice-dice.de]
++ Max Fielker [max.fielker@slice-dice.de]
 
 A thin made node for the made cluster.
 
@@ -76,7 +78,9 @@ The AngularJS made service, which provides access to the made cluster.
 
     Example:
 
+    ```javascript
         var channel = Made.channel('file://crm/myfile');
+    ```
 
 + topology()
 
@@ -84,10 +88,12 @@ The AngularJS made service, which provides access to the made cluster.
 
     Result:
 
+    ```json
         {
             "nodes": [{"id": "", "type": "", "host": "", "port": 9090}],
             "links": [{"source": 0, "target": 1}]
         }
+    ```
 
 + schema(url)
 
@@ -112,6 +118,7 @@ The AngularJS made service, which provides access to the made cluster.
 
     Result:
 
+    ```json
         [{
             "id": "",
             "doc": "",
@@ -132,6 +139,7 @@ The AngularJS made service, which provides access to the made cluster.
                 "subspaces": "",
             }],
         }]
+    ```
 
 + loginByName(name, password)
 
@@ -142,10 +150,12 @@ The AngularJS made service, which provides access to the made cluster.
 
     Example:
 
+    ```javascript
         Made.loginByName('hans', 'l34d')
             .then(function(result) {
 
             });
+    ```
 
 + loginByEmail(email, password)
 
@@ -156,10 +166,12 @@ The AngularJS made service, which provides access to the made cluster.
 
     Example:
 
+    ```javascript
         Made.loginByEmail('hans@funky.net', 'l34d')
             .then(function(result) {
 
             });
+    ```
 
 + logout()
 
@@ -243,8 +255,9 @@ Channel
 
     Example:
 
+    ```javascript
         channel.asyncRecv()
             .then(function(data) {
 
             });
-
+    ```

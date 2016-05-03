@@ -47,68 +47,6 @@ function url() {
 }
 
 
-function Workflow(made, modtype, flow) {
-    return {
-        name: flow.name,
-        doc: flow.doc,
-        states: flow.states,
-        transitions: flow.transitions,
-        init: function() {
-            var me = {
-                ctx: null,
-                name: flow.name,
-                doc: flow.doc,
-                states: flow.states,
-                transitions: flow.transitions,
-                onupdate: null
-            };
-            var rpcs = made.services[modtype].rpcs;
-
-            me.step = function() {
-                rpcs.workflow_step(me.ctx)
-                    .then(function(result) {
-                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
-
-                        me.ctx = result.data;
-
-                        if(me.onupdate) {
-                            me.onupdate(result);
-                        }
-                    });
-            };
-
-            me.start = function() {
-                rpcs.workflow_start(flow.name)
-                    .then(function(result) {
-                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
-
-                        me.ctx = result.data;
-
-                        if(me.onupdate) {
-                            me.onupdate(result);
-                        }
-                    });
-            };
-
-            me.html = function(prefix) {
-                if(me.ctx) {
-                    if(me.ctx.template) {
-                        return me.ctx.template;
-                    }
-                    else {
-                        return buildhtml(me.ctx.data, prefix + '.ctx.data.');
-                    }
-                }
-
-                return '';
-            };
-
-            return me;
-        }
-    };
-}
-
-
 function _arrayBufferToBase64( buffer ) {
     var binary = '';
     var bytes = new Uint8Array( buffer );
@@ -335,11 +273,10 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     var made = this;
     var reconnect_timeout = 1000;
 
-    this.user = null;
+    this.user     = null;
     this.contexts = contexts;
-    this.wss = null;
-    this.errors = [];
-
+    this.wss      = null;
+    this.errors   = [];
 
     function setup_socket() {
         made.wss = new WebSocket(url());
@@ -496,18 +433,13 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         });
     };
 
-    this.request = function(uri, args, kwargs) {
-        if(typeof args === 'undefined') {
-            args = [];
-        }
-
+    this.request = function(uri, kwargs) {
         if(typeof kwargs === 'undefined') {
             kwargs = {};
         }
 
         var data = {
             uri    : uri,
-            args   : args,
             kwargs : kwargs
         };
 
