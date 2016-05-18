@@ -4,33 +4,6 @@
  */
 var madejs = angular.module('made-js', ['uuid4', 'ngCookies']);
 
-madejs.config(['$compileProvider', function($compileProvider) {
-    // configure new 'made-compile' directive by passing a directive
-    // factory function. The factory function injects the '$compile'
-    $compileProvider.directive('madeCompile', function($compile) {
-        // directive factory creates a link function
-        return function(scope, element, attrs) {
-            scope.$watch(
-                function(scope) {
-                    // watch the 'compile' expression for changes
-                    return scope.$eval(attrs.madeCompile);
-                },
-                function(value) {
-                    // when the 'compile' expression changes
-                    // assign it into the current DOM
-                    element.html(value);
-
-                    // compile the new DOM and link it to the current
-                    // scope.
-                    // NOTE: we only compile .childNodes so that
-                    // we don't get into infinite loop compiling ourselves
-                    $compile(element.contents())(scope);
-                }
-            );
-        };
-    });
-}]);
-
 var LOGGING = true;
 
 /**
@@ -306,7 +279,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         made.wss.onmessage = function(msg) {
             msg = JSON.parse(msg.data);
 
-            if(LOGGING) console.log('-- received --'+ (msg.error ? 'ERROR' : ''), msg);
+            if(LOGGING) console.log('-- received --' + (msg.error ? 'ERROR' : ''), msg);
 
             switch (msg.action) {
                 case 'answer':
