@@ -9,7 +9,7 @@ gulp.task('default', function() {
   return gulp
     .src(['src/**/*.js'])
     .pipe( concat('made.js') )
-    .pipe( uglify() )
+    .pipe( uglify({'mangle': false}) )
     .pipe( gulp.dest('dist/'));
 });
 
