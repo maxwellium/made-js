@@ -28,6 +28,7 @@ class Made {
   }
 
   setupSocket() {
+    let made = this;
     this.wss = new WebSocket( this.madeUrlService );
 
     if ( !this.user ) {
@@ -38,53 +39,53 @@ class Made {
     }
 
     this.wss.onopen = () => {
-      this.$rootScope.$broadcast('made-connection-open');
+      made.$rootScope.$broadcast('made-connection-open');
       console.log( 'socket open!' );
     };
 
     this.wss.onerror = ( errorEvent ) => {
-      this.$rootScope.$broadcast('made-connection-error');
+      made.$rootScope.$broadcast('made-connection-error');
       console.log( 'socket error, event:', errorEvent );
     };
 
     this.wss.onclose = ( closeEvent ) => {
-      this.$rootScope.$broadcast('made-connection-closed');
+      made.$rootScope.$broadcast('made-connection-closed');
       console.log( 'socket close, event:', closeEvent );
-      setTimeout( this.setupSocket, this.reconnectTimeout );
+      setTimeout( made.setupSocket.bind(made), made.reconnectTimeout );
 
-      if ( this.reconnectTimeout < 1000 * 60 * 2 ) {
-        this.reconnectTimeout *= 2;
+      if ( made.reconnectTimeout < 1000 * 60 * 2 ) {
+        made.reconnectTimeout *= 2;
       }
     };
 
-    this.wss.onmessage = function ( msg ) {
+    this.wss.onmessage = ( msg ) => {
       msg = JSON.parse( msg.data );
 
 
       switch (msg.action) {
         case 'answer':
-          if ( msg.context in this.contexts ) {
+          if ( msg.context in made.contexts ) {
             if ( msg.success ) {
-              this.contexts[ msg.context ].resolve( msg );
-              if ( 'schema' === this.contexts[ msg.context ].action ) {
-                console.log( '++ received schema ++', this.contexts[ msg.context ].uri, msg.data.schema );
+              made.contexts[ msg.context ].resolve( msg );
+              if ( 'schema' === made.contexts[ msg.context ].action ) {
+                console.log( '++ received schema ++', made.contexts[ msg.context ].uri, msg.data.schema );
               } else {
-                console.log( '++ received ++', this.contexts[ msg.context ].uri, msg.data, msg.error );
+                console.log( '++ received ++', made.contexts[ msg.context ].uri, msg.data, msg.error );
               }
             } else {
-              console.log( '-- received --' + (msg.error ? 'ERROR' : ''), this.contexts[ msg.context ].uri, msg );
-              if ( this.contexts[ msg.context ].reject ) {
-                this.contexts[ msg.context ].reject( msg );
-                this.$rootScope.$broadcast( 'made-error', msg );
+              console.log( '-- received --' + (msg.error ? 'ERROR' : ''), made.contexts[ msg.context ].uri, msg );
+              if ( made.contexts[ msg.context ].reject ) {
+                made.contexts[ msg.context ].reject( msg );
+                made.$rootScope.$broadcast( 'made-error', msg );
               }
 
               // UnknownIssuer exception: because key from the login is not longer valid.
               if ( '15c3ad4d828c5937a721893351c767fd' === msg.error.id ) {
-                this.logout();
-                this.$rootScope.$broadcast( 'made-logout' );
+                made.logout();
+                made.$rootScope.$broadcast( 'made-logout' );
               }
             }
-            delete this.contexts[ msg.context ];
+            delete made.contexts[ msg.context ];
           } else {
             console.log( 'made-js error: message for unknown context' );
           }
@@ -96,15 +97,15 @@ class Made {
               console.log( '!!!FATAL!!! Opening channel to browser not allowed!' );
               break;
             case 'package':
-              if ( msg.context in this.contexts ) {
-                this.contexts[ msg.context ].handleRecv( msg.data.package );
+              if ( msg.context in made.contexts ) {
+                made.contexts[ msg.context ].handleRecv( msg.data.package );
               } else {
                 console.log( 'package for unknown channel' );
               }
               break;
             case 'close':
-              if ( msg.context in this.contexts ) {
-                this.contexts[ msg.context ].handleClose();
+              if ( msg.context in made.contexts ) {
+                made.contexts[ msg.context ].handleClose();
               } else {
                 console.log( 'close for unknown channel' );
               }
@@ -128,10 +129,11 @@ class Made {
 
 
   whenConnected( callback ) {
+    let made = this;
     function wait() {
       console.log( 'made-js - wait for connect' );
-      setTimeout( function () {
-        this.whenConnected( callback );
+      setTimeout( () => {
+        made.whenConnected( callback );
       }, 750 );
     }
 
@@ -192,13 +194,18 @@ class Made {
     } );
   }
 
-  request( uri, kwargs ) {
+  request( uri, args, kwargs ) {
     if ( typeof kwargs === 'undefined' ) {
       kwargs = {};
     }
 
+    if ( typeof args === 'undefined' ) {
+      args = [];
+    }
+
     var data = {
       uri: uri,
+      args: [],
       kwargs: kwargs
     };
 
