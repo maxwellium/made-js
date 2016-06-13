@@ -16,6 +16,8 @@ class Made {
       $rootScope,
       uuid4,
       madeUrlService,
+      connectionStates: { CLOSED: 0, OPEN: 1 },
+      connectionState: 0,
       contexts: {},
       reconnectTimeout: 1000,
       user: null,
@@ -39,16 +41,19 @@ class Made {
     }
 
     this.wss.onopen = () => {
+      made.connectionState = this.connectionStates.OPEN;
       made.$rootScope.$broadcast('made-connection-open');
       console.log( 'socket open!' );
     };
 
     this.wss.onerror = ( errorEvent ) => {
+      made.connectionState = made.connectionStates.CLOSED;
       made.$rootScope.$broadcast('made-connection-error');
       console.log( 'socket error, event:', errorEvent );
     };
 
     this.wss.onclose = ( closeEvent ) => {
+      made.connectionState = made.connectionStates.CLOSED;
       made.$rootScope.$broadcast('made-connection-closed');
       console.log( 'socket close, event:', closeEvent );
       setTimeout( made.setupSocket.bind(made), made.reconnectTimeout );
