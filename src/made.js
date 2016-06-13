@@ -9,6 +9,7 @@ import madeFile from './file';
 class Made {
 
   constructor( $q, $cookieStore, $rootScope, uuid4, madeUrlService ) {
+    'ngInject';
     Object.assign( this, {
       $q,
       $cookieStore,
