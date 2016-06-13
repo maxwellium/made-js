@@ -37,18 +37,18 @@ class Made {
       this.user = null;
     }
 
-    this.wss.onopen = function () {
-      $rootScope.$broadcast('made-connection-open');
+    this.wss.onopen = () => {
+      this.$rootScope.$broadcast('made-connection-open');
       console.log( 'socket open!' );
     };
 
-    this.wss.onerror = function ( errorEvent ) {
-      $rootScope.$broadcast('made-connection-error');
+    this.wss.onerror = ( errorEvent ) => {
+      this.$rootScope.$broadcast('made-connection-error');
       console.log( 'socket error, event:', errorEvent );
     };
 
-    this.wss.onclose = function ( closeEvent ) {
-      $rootScope.$broadcast('made-connection-closed');
+    this.wss.onclose = ( closeEvent ) => {
+      this.$rootScope.$broadcast('made-connection-closed');
       console.log( 'socket close, event:', closeEvent );
       setTimeout( this.setupSocket, this.reconnectTimeout );
 
