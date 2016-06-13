@@ -28,7 +28,7 @@ class Made {
   }
 
   setupSocket() {
-    this.wss = new WebSocket( this.madeUrlService() );
+    this.wss = new WebSocket( this.madeUrlService );
 
     if ( !this.user ) {
       this.user = this.$cookieStore.get( 'user' );
