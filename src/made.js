@@ -3,8 +3,8 @@
  * @author Max Fielker [max.fielker@slice.dice.de]
  */
 
-import madeChannel from './madeChannel';
-import madeFile from './madeFile';
+import madeChannel from './channel';
+import madeFile from './file';
 
 class Made {
 
