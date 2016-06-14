@@ -277,6 +277,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     this.contexts = contexts;
     this.wss      = null;
     this.errors   = [];
+    this.state    = "CLOSED";
 
     function setup_socket() {
         made.wss = new WebSocket(url());
@@ -288,16 +289,19 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         }
 
         made.wss.onopen = function() {
+            made.state = "OPEN";
             $rootScope.$broadcast('made-connection-open');
             if(LOGGING) console.log("socket open!");
         };
 
         made.wss.onerror = function (error) {
+            made.state = "CLOSED";
             $rootScope.$broadcast('made-connection-error');
             console.log('socket error: ', error);
         };
 
         made.wss.onclose = function(){
+            made.state = "CLOSED";
             $rootScope.$broadcast('made-connection-closed');
             setTimeout(setup_socket, made.reconnect_timeout);
 
