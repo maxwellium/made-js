@@ -288,18 +288,21 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         }
 
         made.wss.onopen = function() {
+            $rootScope.$broadcast('made-connection-open');
             if(LOGGING) console.log("socket open!");
         };
 
         made.wss.onerror = function (error) {
+            $rootScope.$broadcast('made-connection-error');
             console.log('socket error: ', error);
         };
 
         made.wss.onclose = function(){
+            $rootScope.$broadcast('made-connection-closed');
             setTimeout(setup_socket, made.reconnect_timeout);
 
             if(made.reconnect_timeout < 1000*60*2) {
-                made.reconnect_timeout * 2;
+                made.reconnect_timeout *= 2;
             }
         };
 
