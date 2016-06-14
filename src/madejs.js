@@ -305,7 +305,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
             $rootScope.$broadcast('made-connection-closed');
             setTimeout(setup_socket, made.reconnect_timeout);
 
-            if(made.reconnect_timeout < 1000*60*2) {
+            if(made.reconnect_timeout < 1000*15) {
                 made.reconnect_timeout *= 2;
             }
         };
