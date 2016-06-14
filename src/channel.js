@@ -6,6 +6,7 @@
 class Channel {
 
   constructor( Made, uri, context ) {
+    'ngInject';
     Object.assign( this, {
       Made,
       uri,

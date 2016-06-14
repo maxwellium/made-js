@@ -30,6 +30,7 @@ function _base64ToArrayBuffer( base64 ) {
 class File {
 
   constructor( Made, ctx ) {
+    'ngInject';
     Object.assign( this, {
       Made,
       ctx,

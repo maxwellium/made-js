@@ -5,10 +5,10 @@
 
 import 'angular-uuid4'
 
-import Made from "made"
-import UrlServiceProvider from "urlserviceprovider"
-import storeFile from "storefile"
-import * as topology from "topology"
+import Made from "./made"
+import UrlServiceProvider from "./urlserviceprovider"
+import storeFile from "./storefile"
+import * as topology from "./topology"
 
 angular
   .module('made-js', [
