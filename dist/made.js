@@ -271,13 +271,13 @@ function Channel(made, uri, context) {
 madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     var contexts = {};
     var made = this;
-    var reconnect_timeout = 1000;
 
     this.user     = null;
     this.contexts = contexts;
     this.wss      = null;
     this.errors   = [];
     this.state    = "CLOSED";
+    made.reconnect_timeout = 1000;
 
     function setup_socket() {
         made.wss = new WebSocket(url());
