@@ -43,7 +43,70 @@ function url() {
         prot = 'wss://';
     }
 
-    return prot + window.location.host + '/ws';
+    return "wss://app-verwaltung.softfair-server.de/ws"
+    // return prot + window.location.host + '/ws';
+}
+
+
+function Workflow(made, modtype, flow) {
+    return {
+        name: flow.name,
+        doc: flow.doc,
+        states: flow.states,
+        transitions: flow.transitions,
+        init: function() {
+            var me = {
+                ctx: null,
+                name: flow.name,
+                doc: flow.doc,
+                states: flow.states,
+                transitions: flow.transitions,
+                onupdate: null
+            };
+            var rpcs = made.services[modtype].rpcs;
+
+            me.step = function() {
+                rpcs.workflow_step(me.ctx)
+                    .then(function(result) {
+                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
+
+                        me.ctx = result.data;
+
+                        if(me.onupdate) {
+                            me.onupdate(result);
+                        }
+                    });
+            };
+
+            me.start = function() {
+                rpcs.workflow_start(flow.name)
+                    .then(function(result) {
+                        if(LOGGING) console.log('made-workflow-ctx:', result.data);
+
+                        me.ctx = result.data;
+
+                        if(me.onupdate) {
+                            me.onupdate(result);
+                        }
+                    });
+            };
+
+            me.html = function(prefix) {
+                if(me.ctx) {
+                    if(me.ctx.template) {
+                        return me.ctx.template;
+                    }
+                    else {
+                        return buildhtml(me.ctx.data, prefix + '.ctx.data.');
+                    }
+                }
+
+                return '';
+            };
+
+            return me;
+        }
+    };
 }
 
 
@@ -440,13 +503,18 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         });
     };
 
-    this.request = function(uri, kwargs) {
+    this.request = function(uri, args, kwargs) {
+        if(typeof args === 'undefined') {
+            args = [];
+        }
+
         if(typeof kwargs === 'undefined') {
             kwargs = {};
         }
 
         var data = {
             uri    : uri,
+            args   : args,
             kwargs : kwargs
         };
 
@@ -520,7 +588,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
         if(username && password) {
             defer = $q.defer();
 
-            made.request('rpc://crm/user/login', {'user': username, 'password': password})
+            made.request('rpc://crm/user/login', [], {'user': username, 'password': password})
                 .then(function(result) {
                     if(result['success']) {
                         made.user = result['data'];
@@ -538,7 +606,7 @@ madejs.service('Made', function($http, $q, $cookieStore, $rootScope, uuid4) {
     };
 
     this.loginByEmail = function(email, password) {
-        return made.request('rpc://crm/user/login', {'email': email, 'password': password})
+        return made.request('rpc://crm/user/login', [], {'email': email, 'password': password})
            .then(function(result) {
                made.user = result.data;
                $cookieStore.put('user', made.user);
