@@ -14,5 +14,18 @@
   "bugs": {
     "url": "https://github.com/slicedice/made-js/issues"
   },
-  "homepage": "https://github.com/slicedice/made-js#readme"
+  "homepage": "https://github.com/slicedice/made-js#readme",
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-3"
+    ],
+    "plugins": [
+      "babel-plugin-transform-object-assign",
+      "transform-async-to-generator",
+      "transform-regenerator",
+      "transform-runtime",
+      "syntax-async-functions"
+    ]
+  }
 }
