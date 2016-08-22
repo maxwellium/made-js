@@ -27,5 +27,10 @@
       "transform-runtime",
       "syntax-async-functions"
     ]
+  },
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
   }
 }
