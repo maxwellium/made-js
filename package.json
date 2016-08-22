@@ -17,20 +17,24 @@
   "homepage": "https://github.com/slicedice/made-js#readme",
   "babel": {
     "presets": [
-      "es2015",
-      "stage-3"
+      "es2015"
     ],
     "plugins": [
       "babel-plugin-transform-object-assign",
-      "transform-async-to-generator",
-      "transform-regenerator",
-      "transform-runtime",
-      "syntax-async-functions"
+      "transform-runtime"
     ]
   },
   "browserify": {
     "transform": [
       "babelify"
     ]
+  },
+  "devDependencies": {
+    "babel-core": "latest",
+    "babel-plugin-transform-object-assign": "latest",
+    "babel-plugin-transform-runtime": "latest",
+    "babel-preset-es2015": "latest",
+    "babelify": "latest",
+    "browserify": "latest"
   }
 }
