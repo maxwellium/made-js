@@ -15,7 +15,7 @@ export default class Made extends Emitter {
     } );
 
     this.contexts = {};
-    this.reconnectTimeout = 1000;
+    this.reconnectTimeout = Math.round( Math.random() * 500 + 500 );
     this.wss = false;
     this.store = madeConfig.store;
     this.user = {};
