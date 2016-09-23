@@ -5,14 +5,13 @@ import Emitter from './lib/Emitter';
 export default class Made extends Emitter {
 
   constructor( $q, $http, madeConfig ) {
+    'ngInject';
 
     super();
 
-    Object.assign( this, {
-      $q,
-      $http,
-      madeConfig
-    } );
+    this.$q = $q;
+    this.$http = $http;
+    this.madeConfig = madeConfig;
 
     this.contexts = {};
     this.reconnectTimeout = Math.round( Math.random() * 500 + 500 );

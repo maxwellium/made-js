@@ -1,8 +1,3 @@
-/**
- * @author Arne Simon [arne.simon@slice-dice.de]
- * @author Max Fielker [max.fielker@slice.dice.de]
- */
-
 import Made from './Made';
 import madeConfigProvider from './configProvider';
 import madeFileInput from './directives/fileInput';
