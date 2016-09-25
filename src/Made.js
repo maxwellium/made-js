@@ -218,7 +218,7 @@ export default class Made extends Emitter {
   }
 
 
-  isLoggedin() {
+  isLoggedIn() {
     return Object.keys( this.user ).length > 0;
   }
 
