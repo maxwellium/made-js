@@ -198,7 +198,7 @@ export default class Made extends Emitter {
     let formData = new FormData(),
       request = {
         method: 'POST',
-        url: '/gridfs',
+        url: this.madeConfig.url.protocol + this.madeConfig.url.host + '/gridfs',
         data: formData,
         headers: {
           'Content-Type': undefined
