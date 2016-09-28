@@ -5,11 +5,13 @@ export default class madeConfigProvider {
     this.url = {
       protocol: 'ws://',
       host: window.location.host,
-      path: '/ws'
+      path: '/ws',
+      gridProtocol: 'http://'
     };
 
     if ( 'https:' === window.location.protocol ) {
       this.url.protocol = 'wss://';
+      this.url.gridProtocol = 'https://';
     }
 
     this.store = window.localStorage;
