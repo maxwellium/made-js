@@ -20,7 +20,7 @@ export default class Emitter {
 
     this.eventLength++;
 
-    return this;
+    return () => this.off( event, callback );
   }
 
   off( event, callback ) {
