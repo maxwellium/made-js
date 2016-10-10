@@ -4,7 +4,8 @@ export default function madeFileInput() {
     restrict: 'A',
     scope: {
       madeFileInput: '=',
-      madeFileSingle: '@'
+      madeFileSingle: '@',
+      madeFileOnChange: '&'
     },
     link: function ( scope, element ) {
 
@@ -30,7 +31,12 @@ export default function madeFileInput() {
           }
         }
 
+        if (scope.madeFileOnChange) {
+          scope.madeFileOnChange();
+        }
+
         scope.$apply();
+
       } );
     }
   };
