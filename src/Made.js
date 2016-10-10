@@ -159,7 +159,7 @@ export default class Made extends Emitter {
 
     this.trigger( 'message:send', msg );
 
-    this.whenConnected( () => this.wss.send( JSON.stringify( msg ) ) );
+    this.whenConnected( () => this.wss.send( angular.toJson( msg ) ) );
   }
 
 
@@ -233,7 +233,7 @@ export default class Made extends Emitter {
       .then( user => {
 
         this.user = user;
-        this.store.setItem( 'made-user', JSON.stringify( this.user ) );
+        this.store.setItem( 'made-user', angular.toJson( this.user ) );
         this.trigger( 'login' );
 
         return user;
