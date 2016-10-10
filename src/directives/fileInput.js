@@ -31,11 +31,11 @@ export default function madeFileInput() {
           }
         }
 
+        scope.$apply();
+
         if (scope.madeFileOnChange) {
           scope.madeFileOnChange();
         }
-
-        scope.$apply();
 
       } );
     }
