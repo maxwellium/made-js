@@ -9,15 +9,19 @@ export default class Made extends Emitter {
 
     super();
 
-    this.$q = $q;
-    this.$http = $http;
+    this.$q         = $q;
+    this.$http      = $http;
     this.madeConfig = madeConfig;
 
-    this.contexts = {};
-    this.reconnectTimeout = Math.round( Math.random() * 500 + 500 );
-    this.wss = false;
-    this.store = madeConfig.store;
-    this.user = {};
+
+    this.contexts         = {};
+    this.initialTimeout   = madeConfig.reconnectTimeout || Math.round( Math.random() * 500 + 500 );
+    this.reconnectTimeout = this.initialTimeout;
+    this.wss              = false;
+    this.store            = madeConfig.store;
+    this.user             = {};
+    this.debug            = madeConfig.debug;
+
 
     let user = this.store.getItem( 'made-user' );
     if ( user ) {
@@ -26,8 +30,9 @@ export default class Made extends Emitter {
 
     this.setupSocket();
 
-    //TODO: wrap in config/debug block
-    this.registerMessages();
+    if ( this.debug ) {
+      this.registerMessages();
+    }
 
   }
 
@@ -36,7 +41,11 @@ export default class Made extends Emitter {
 
     this.wss = new WebSocket( this.madeConfig.url.protocol + this.madeConfig.url.host + this.madeConfig.url.path );
 
-    this.wss.onopen = open => this.trigger( 'socket:open', open );
+    this.wss.onopen = open => {
+      this.reconnectTimeout = this.initialTimeout;
+      this.trigger( 'socket:open', open );
+    };
+
     this.wss.onerror = error => this.trigger( 'socket:error', error );
 
     this.wss.onmessage = message => this.receiveMessage( message );
@@ -64,12 +73,18 @@ export default class Made extends Emitter {
     message = JSON.parse( message.data );
 
     if ( 'answer' !== message.action ) {
-      console.log( 'made-js dropping message that\’s not an answer', message );
+
+      if ( this.debug ) {
+        console.log( 'made-js dropping message that\’s not an answer', message );
+      }
       return;
     }
 
     if ( !(message.context in this.contexts) ) {
-      console.error( 'made-js error: message for unknown context', message );
+
+      if ( this.debug ) {
+        console.error( 'made-js error: message for unknown context', message );
+      }
       return;
     }
 
@@ -89,11 +104,11 @@ export default class Made extends Emitter {
 
   message( action, data ) {
     return {
-      user: this.user,
+      user:    this.user,
       context: 0,
-      action: action,
-      data: data,
-      error: null,
+      action:  action,
+      data:    data,
+      error:   null,
       success: true,
     };
   }
@@ -111,7 +126,6 @@ export default class Made extends Emitter {
     if ( this.wss ) {
       switch (this.wss.readyState) {
         case WebSocket.OPEN:
-          this.reconnectTimeout = 1000;
           callback();
           break;
         case WebSocket.CONNECTING:
@@ -131,7 +145,7 @@ export default class Made extends Emitter {
   send( action, data ) {
 
     let deferred = this.$q.defer(),
-      context = uuid4();
+      context    = uuid4();
 
     this.contexts[ context ] = deferred;
 
@@ -153,7 +167,7 @@ export default class Made extends Emitter {
 
     } else if ( 'schema' === msg.action ) {
 
-      this.contexts[ context ].uri = msg.data;
+      this.contexts[ context ].uri    = msg.data;
       this.contexts[ context ].action = msg.action;
     }
 
@@ -196,10 +210,10 @@ export default class Made extends Emitter {
   upload( file, tags = [], userId = this.user._id ) {
 
     let formData = new FormData(),
-      request = {
-        method: 'POST',
-        url: this.madeConfig.url.gridProtocol + this.madeConfig.url.host + '/gridfs',
-        data: formData,
+      request    = {
+        method:  'POST',
+        url:     this.madeConfig.url.gridProtocol + this.madeConfig.url.host + '/gridfs',
+        data:    formData,
         headers: {
           'Content-Type': undefined
         }

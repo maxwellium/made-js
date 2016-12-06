@@ -28,6 +28,9 @@
       "babelify"
     ]
   },
+  "dependencies": {
+    "angular": "latest"
+  },
   "devDependencies": {
     "babel-core": "latest",
     "babel-plugin-transform-runtime": "latest",
@@ -35,6 +38,7 @@
   },
   "esformatter": {
     "root": true,
+    "plugins": ["esformatter-align"],
     "collapseObjects": {
       "ObjectExpression": {
         "maxLineLength": 80,
