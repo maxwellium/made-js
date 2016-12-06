@@ -1,6 +1,6 @@
 {
   "name": "made-js",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "made-js =======",
   "main": "src/index.js",
   "scripts": {
@@ -38,7 +38,9 @@
   },
   "esformatter": {
     "root": true,
-    "plugins": ["esformatter-align"],
+    "plugins": [
+      "esformatter-align"
+    ],
     "collapseObjects": {
       "ObjectExpression": {
         "maxLineLength": 80,
