@@ -104,7 +104,10 @@ export default class Made extends Emitter {
 
   message( action, data ) {
     return {
-      user:    this.user,
+      user: {
+        _id:     this.user._id,
+        session: this.user.session
+      },
       context: 0,
       action:  action,
       data:    data,
